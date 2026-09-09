@@ -453,16 +453,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var mCount = document.getElementById('pos-m-bar-count-text');
     if (mCount) mCount.textContent = cart.length + ' items ' + (totalGrams > 0 ? '· ' + (totalGrams >= 1000 ? (totalGrams/1000).toFixed(3) + ' kg' : totalGrams + ' g') : '');
 
-    // Update Print Slip & PDF Container
+    // Update Thermal Receipt Container
     updatePrintableSlip(subtotal, boxCharge, discAmount, grandTotal);
-    updatePdfContainer(subtotal, boxCharge, discAmount, grandTotal);
   }
 
   function updatePrintableSlip(subtotal, boxCharge, discAmount, grandTotal) {
     var now = new Date();
     document.getElementById('prn-inv-no').textContent = invoiceNum;
     document.getElementById('prn-inv-date').textContent = now.toLocaleDateString('en-IN');
-    document.getElementById('prn-inv-time').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('prn-inv-time').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
     
     var custName = (document.getElementById('cust-name').value || '').trim() || 'Valued Patron';
     var custPhone = (document.getElementById('cust-phone').value || '').trim() || 'Counter Sale';
@@ -471,14 +470,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var prnTbody = document.getElementById('prn-table-body');
     if (cart.length === 0) {
-      prnTbody.innerHTML = '<tr><td colspan="3" style="text-align:center">No items</td></tr>';
+      prnTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:12px 0;color:#666">No sweets added to this bill</td></tr>';
     } else {
       prnTbody.innerHTML = cart.map(function (row) {
-        var wtStr = row.unit === 'kg' ? (row.grams >= 1000 ? (row.grams/1000).toFixed(3) + 'kg' : row.grams + 'g') : row.count + ' ' + row.unit;
+        var rateStr = inrRound(row.rate) + (row.unit === 'box' ? '/box' : (row.unit === 'piece' ? '/pc' : '/kg'));
+        var wtStr = row.unit === 'kg' ? (row.grams >= 1000 ? (row.grams/1000).toFixed(3) + 'kg' : row.grams + 'g') : row.count + ' ' + (row.unit === 'box' ? (row.count > 1 ? 'boxes' : 'box') : (row.count > 1 ? 'pcs' : 'pc'));
+        var hi = row.nameHi ? ' <span style="font-size:10px;color:#555">(' + esc(row.nameHi) + ')</span>' : '';
         return '<tr>' +
-          '<td>' + esc(row.name) + '</td>' +
-          '<td>' + wtStr + '</td>' +
-          '<td style="text-align:right">' + inr(row.amount) + '</td>' +
+          '<td><div class="prn-item-name">' + esc(row.name) + hi + '</div><div class="prn-item-rate">@ ' + rateStr + '</div></td>' +
+          '<td style="text-align:center;white-space:nowrap;font-weight:bold">' + wtStr + '</td>' +
+          '<td style="text-align:right;font-weight:bold">' + inr(row.amount) + '</td>' +
         '</tr>';
       }).join('');
     }
@@ -486,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('prn-subtotal').textContent = inr(subtotal);
     var boxRow = document.getElementById('prn-box-row');
     if (boxCharge > 0) {
-      boxRow.style.display = '';
+      boxRow.style.display = 'flex';
       document.getElementById('prn-box-charge').textContent = inr(boxCharge);
     } else {
       boxRow.style.display = 'none';
@@ -494,63 +495,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var discRow = document.getElementById('prn-disc-row');
     if (discAmount > 0) {
-      discRow.style.display = '';
+      discRow.style.display = 'flex';
       document.getElementById('prn-disc-amt').textContent = '-' + inr(discAmount);
     } else {
       discRow.style.display = 'none';
     }
 
     document.getElementById('prn-grand-total').textContent = inr(grandTotal);
-  }
-
-  function updatePdfContainer(subtotal, boxCharge, discAmount, grandTotal) {
-    var now = new Date();
-    document.getElementById('pdf-inv-no').textContent = invoiceNum;
-    document.getElementById('pdf-inv-date').textContent = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-    document.getElementById('pdf-inv-time').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-    var custName = (document.getElementById('cust-name').value || '').trim() || 'Valued Patron';
-    var custPhone = (document.getElementById('cust-phone').value || '').trim() || 'Counter Sale';
-    document.getElementById('pdf-cust-name').textContent = custName;
-    document.getElementById('pdf-cust-phone').textContent = custPhone;
-
-    var pdfTbody = document.getElementById('pdf-table-body');
-    if (cart.length === 0) {
-      pdfTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px">No sweets added to this invoice.</td></tr>';
-    } else {
-      pdfTbody.innerHTML = cart.map(function (row, idx) {
-        var rateStr = inrRound(row.rate) + (row.unit === 'box' ? '/box' : (row.unit === 'piece' ? '/pc' : '/kg'));
-        var wtStr = row.unit === 'kg' ? (row.grams >= 1000 ? (row.grams/1000).toFixed(3) + ' kg' : row.grams + ' g') : row.count + ' ' + (row.unit === 'box' ? (row.count > 1 ? 'boxes' : 'box') : (row.count > 1 ? 'pcs' : 'pc'));
-        var deva = row.nameHi ? ' <span style="font-size:11px;color:#7c6a55">(' + esc(row.nameHi) + ')</span>' : '';
-
-        return '<tr>' +
-          '<td style="text-align:center;font-weight:bold">' + (idx + 1) + '</td>' +
-          '<td><b>' + esc(row.name) + '</b>' + deva + '</td>' +
-          '<td style="text-align:center">' + rateStr + '</td>' +
-          '<td style="text-align:center"><b>' + wtStr + '</b></td>' +
-          '<td style="text-align:right;font-weight:bold;color:var(--burgundy)">' + inr(row.amount) + '</td>' +
-        '</tr>';
-      }).join('');
-    }
-
-    document.getElementById('pdf-subtotal').textContent = inr(subtotal);
-    var boxRow = document.getElementById('pdf-box-row');
-    if (boxCharge > 0) {
-      boxRow.style.display = '';
-      document.getElementById('pdf-box-charge').textContent = inr(boxCharge);
-    } else {
-      boxRow.style.display = 'none';
-    }
-
-    var discRow = document.getElementById('pdf-disc-row');
-    if (discAmount > 0) {
-      discRow.style.display = '';
-      document.getElementById('pdf-disc-amt').textContent = '-' + inr(discAmount);
-    } else {
-      discRow.style.display = 'none';
-    }
-
-    document.getElementById('pdf-grand-total').textContent = inr(grandTotal);
   }
 
   // Event Listeners for Recalculation
@@ -677,58 +628,71 @@ document.addEventListener('DOMContentLoaded', function () {
     window.open(waUrl, '_blank');
   });
 
-  // DOWNLOAD PROPER ROYAL PDF BILL
+  // DOWNLOAD THERMAL PDF BILL (80mm POS RECEIPT)
   document.getElementById('btn-download-pdf').addEventListener('click', function () {
     if (cart.length === 0) {
       alert('Please add items to bill before downloading PDF.');
       return;
     }
 
-    var container = document.getElementById('pos-royal-pdf-container');
+    var container = document.getElementById('pos-thermal-receipt');
     if (!container) return;
 
     // Show loading state
     var btn = this;
     var origText = btn.innerHTML;
-    btn.innerHTML = '⏳ Generating PDF...';
+    btn.innerHTML = '⏳ Generating Thermal PDF...';
     btn.disabled = true;
 
-    // Temporarily bring container in view for rendering
-    container.style.position = 'relative';
+    // Ensure thermal receipt has fresh calculations
+    renderCart();
+
+    // Temporarily bring container in view for html2canvas rendering
+    container.style.position = 'fixed';
     container.style.left = '0';
     container.style.top = '0';
+    container.style.display = 'block';
+    container.style.zIndex = '999999';
+    container.style.background = '#ffffff';
+
+    // Calculate dynamic receipt height in mm
+    // 96 DPI: 1px = 25.4 / 96 mm = ~0.264583 mm
+    var pxToMm = 25.4 / 96;
+    var contentHeightMm = Math.ceil(container.scrollHeight * pxToMm);
+    var totalHeightMm = Math.max(90, contentHeightMm + 10);
+
+    var custName = (document.getElementById('cust-name').value || 'Customer').trim().replace(/\s+/g, '_');
+    var filename = 'Thermal_Receipt_' + invoiceNum + '_' + custName + '.pdf';
 
     var opt = {
-      margin: [10, 10, 10, 10],
-      filename: 'Invoice_' + invoiceNum + '_' + (document.getElementById('cust-name').value || 'Customer').replace(/\s+/g, '_') + '.pdf',
+      margin: [4, 2, 4, 2], // 4mm top/bottom, 2mm left/right
+      filename: filename,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { scale: 2.5, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: [80, totalHeightMm], orientation: 'portrait' }
     };
 
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(container).save().then(function () {
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        container.style.top = '-9999px';
-        btn.innerHTML = origText;
-        btn.disabled = false;
-      }).catch(function (err) {
-        console.error('PDF error:', err);
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        container.style.top = '-9999px';
-        btn.innerHTML = origText;
-        btn.disabled = false;
-        alert('PDF generated! If popup was blocked, please enable popups.');
-      });
-    } else {
-      window.print();
+    function resetThermalContainer() {
       container.style.position = 'absolute';
       container.style.left = '-9999px';
       container.style.top = '-9999px';
+      container.style.display = 'none';
+      container.style.zIndex = '';
       btn.innerHTML = origText;
       btn.disabled = false;
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set(opt).from(container).save().then(function () {
+        resetThermalContainer();
+      }).catch(function (err) {
+        console.error('PDF error:', err);
+        resetThermalContainer();
+        alert('Thermal PDF generated! If download was blocked, please check browser downloads.');
+      });
+    } else {
+      resetThermalContainer();
+      window.print();
     }
   });
 

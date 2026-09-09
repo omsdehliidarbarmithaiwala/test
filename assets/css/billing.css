@@ -1067,177 +1067,149 @@ img {
 }
 
 /* ==========================================================================
-   ROYAL VISUALLY STUNNING PDF INVOICE TEMPLATE (OFFSCREEN RENDER CONTAINER)
+   THERMAL RECEIPT SLIP (80mm ESC/POS PRINT & THERMAL PDF CONTAINER)
    ========================================================================== */
-#pos-royal-pdf-container {
+#pos-thermal-receipt {
+  display: none;
   position: absolute;
   left: -9999px;
   top: -9999px;
-  width: 794px; /* A4 standard width at 96 DPI */
-  background: #fff;
-  color: #211B14;
-  font-family: 'Lato', system-ui, -apple-system, sans-serif;
-  padding: 32px 36px;
+  width: 76mm;
+  padding: 4mm 3mm;
   box-sizing: border-box;
-}
-
-.pdf-invoice-box {
-  border: 2.5px solid var(--gold);
-  padding: 24px 28px;
-  background: #fff;
-  position: relative;
-}
-
-.pdf-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 2px solid var(--burgundy);
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-}
-
-.pdf-brand-col {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.pdf-logo-img {
-  width: 75px;
-  height: 75px;
-}
-
-.pdf-shop-name {
-  font-family: 'Bitter', serif;
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--burgundy);
-  line-height: 1.15;
-}
-
-.pdf-shop-sub {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.pdf-shop-addr {
+  font-family: 'Courier New', Courier, monospace;
   font-size: 11.5px;
-  color: #4a4237;
-  line-height: 1.4;
+  line-height: 1.35;
+  color: #000;
+  background: #fff;
+}
+
+#pos-thermal-receipt .prn-logo {
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 6px auto;
+  filter: grayscale(100%) contrast(150%);
+}
+
+#pos-thermal-receipt .prn-header {
+  text-align: center;
+  border-bottom: 1px dashed #000;
+  padding-bottom: 3mm;
+  margin-bottom: 3mm;
+}
+
+#pos-thermal-receipt .prn-header h2 {
+  font-size: 15px;
+  font-weight: 900;
+  margin: 0 0 2px 0;
+  letter-spacing: 0.5px;
+  color: #000;
+}
+
+#pos-thermal-receipt .prn-shop-sub {
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin: 1px 0 3px 0;
+}
+
+#pos-thermal-receipt .prn-header p {
+  margin: 1.5px 0;
+  font-size: 10px;
+  color: #222;
+}
+
+#pos-thermal-receipt .prn-tax-line {
+  font-weight: bold;
+  font-size: 9.5px;
   margin-top: 3px;
 }
 
-.pdf-tax-badges {
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.pdf-tax-pill {
-  background: #FAF4E8;
-  border: 1px solid var(--gold);
-  color: var(--burgundy-dark);
+#pos-thermal-receipt .prn-doc-title {
+  margin-top: 4px;
+  font-weight: 900;
   font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
+  letter-spacing: 1px;
 }
 
-.pdf-inv-meta-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: #FAF6EE;
-  border: 1px solid #E8DECC;
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin-bottom: 18px;
-  gap: 12px;
-}
-
-.pdf-meta-col {
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.pdf-meta-col b {
-  color: var(--burgundy-dark);
-}
-
-.pdf-table {
+#pos-thermal-receipt .prn-meta-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 18px;
+  margin-bottom: 3mm;
+  font-size: 10.5px;
 }
 
-.pdf-table th {
-  background: var(--burgundy);
-  color: #fff;
-  font-family: 'Bitter', serif;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 10px;
-  text-align: left;
+#pos-thermal-receipt .prn-meta-table td {
+  padding: 1.5px 0;
+  vertical-align: top;
 }
 
-.pdf-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #EFE6D8;
-  font-size: 12.5px;
-}
-
-.pdf-table tr:nth-child(even) {
-  background: #FDFBF7;
-}
-
-.pdf-totals-section {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 18px;
-}
-
-.pdf-totals-table {
-  width: 300px;
+#pos-thermal-receipt .prn-items-table {
+  width: 100%;
   border-collapse: collapse;
+  margin-bottom: 3mm;
 }
 
-.pdf-totals-table td {
-  padding: 5px 8px;
-  font-size: 13px;
+#pos-thermal-receipt .prn-items-table th {
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+  padding: 3px 0;
+  font-size: 10.5px;
+  text-transform: uppercase;
 }
 
-.pdf-totals-table tr.grand-row td {
-  border-top: 2px solid var(--burgundy);
-  font-family: 'Bitter', serif;
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--burgundy);
-  padding-top: 8px;
-}
-
-.pdf-footer-notice {
-  border-top: 1.5px dashed var(--gold);
-  padding-top: 12px;
-  text-align: center;
+#pos-thermal-receipt .prn-items-table td {
+  padding: 3px 0;
   font-size: 11px;
-  color: #6B6255;
-  line-height: 1.45;
+  vertical-align: top;
+  border-bottom: 1px dotted #ccc;
 }
 
-.pdf-footer-notice b {
-  color: var(--burgundy);
+#pos-thermal-receipt .prn-item-name {
+  font-weight: bold;
+  line-height: 1.25;
 }
 
-/* --- PRINT RECEIPT STYLES --- */
-#pos-thermal-receipt {
-  display: none;
+#pos-thermal-receipt .prn-item-rate {
+  font-size: 9.5px;
+  color: #444;
 }
 
+#pos-thermal-receipt .prn-summary {
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+  padding: 2.5mm 0;
+  margin-bottom: 3mm;
+}
+
+#pos-thermal-receipt .prn-sum-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 1.5px 0;
+  font-size: 11px;
+}
+
+#pos-thermal-receipt .prn-grand-row {
+  font-size: 14px;
+  font-weight: 900;
+  border-top: 1px dashed #000;
+  padding-top: 2mm;
+  margin-top: 2mm;
+}
+
+#pos-thermal-receipt .prn-footer {
+  text-align: center;
+  font-size: 9.5px;
+  line-height: 1.35;
+  margin-top: 2mm;
+}
+
+#pos-thermal-receipt .prn-footer p {
+  margin: 2px 0;
+}
+
+/* --- PRINT RECEIPT OVERRIDES (WINDOW.PRINT) --- */
 @media print {
   body * {
     visibility: hidden !important;
@@ -1247,58 +1219,12 @@ img {
   }
   #pos-thermal-receipt {
     display: block !important;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80mm;
-    margin: 0;
-    padding: 6mm;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.3;
-    color: #000;
-    background: #fff;
-  }
-  .prn-header {
-    text-align: center;
-    border-bottom: 1px dashed #000;
-    padding-bottom: 4mm;
-    margin-bottom: 4mm;
-  }
-  .prn-header h2 {
-    font-size: 15px;
-    margin-bottom: 2px;
-  }
-  .prn-meta-table, .prn-items-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 4mm;
-  }
-  .prn-items-table th, .prn-items-table td {
-    padding: 2px 0;
-  }
-  .prn-items-table th {
-    border-bottom: 1px dashed #000;
-    text-align: left;
-  }
-  .prn-summary {
-    border-top: 1px dashed #000;
-    border-bottom: 1px dashed #000;
-    padding: 3mm 0;
-    margin-bottom: 4mm;
-  }
-  .prn-sum-row {
-    display: flex;
-    justify-content: space-between;
-    margin: 2px 0;
-  }
-  .prn-grand-row {
-    font-size: 14px;
-    font-weight: bold;
-  }
-  .prn-footer {
-    text-align: center;
-    font-size: 10px;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    margin: 0 !important;
+    padding: 4mm 3mm !important;
   }
 }
 
