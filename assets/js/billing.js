@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var SHOP_BACKUP_PHONE = '919820260299';
   var SHOP_GST = '27ABZPT1488R1Z4';
   var SHOP_FSSAI = '21521015000240';
+  var SHOP_WEBSITE = 'https://omsdehliidarbarmithaiwala.github.io/Our-Website/';
+  var SHOP_MAPS = 'https://maps.google.com/?q=Om%27s%20Dehlii%20Darbar%20Mithaiwala%2C%20Shop%20No.%2020%2C%20Shivaji%20Nagar%2C%20Delisle%20Road%2C%20Lower%20Parel%20%28E%29%2C%20Mumbai%20400013';
   var SHOP_ADDR = "Shop No. 20, Shivaji Nagar, Delisle Road, Lower Parel (E), Mumbai — 400 013";
   var SHOP_PHONES = "99208 79952 / 98202 60299";
 
@@ -453,15 +455,16 @@ document.addEventListener('DOMContentLoaded', function () {
     var mCount = document.getElementById('pos-m-bar-count-text');
     if (mCount) mCount.textContent = cart.length + ' items ' + (totalGrams > 0 ? '· ' + (totalGrams >= 1000 ? (totalGrams/1000).toFixed(3) + ' kg' : totalGrams + ' g') : '');
 
-    // Update Thermal Receipt Container
+    // Update Print Slip & PDF Container
     updatePrintableSlip(subtotal, boxCharge, discAmount, grandTotal);
+    updatePdfContainer(subtotal, boxCharge, discAmount, grandTotal);
   }
 
   function updatePrintableSlip(subtotal, boxCharge, discAmount, grandTotal) {
     var now = new Date();
     document.getElementById('prn-inv-no').textContent = invoiceNum;
     document.getElementById('prn-inv-date').textContent = now.toLocaleDateString('en-IN');
-    document.getElementById('prn-inv-time').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    document.getElementById('prn-inv-time').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     
     var custName = (document.getElementById('cust-name').value || '').trim() || 'Valued Patron';
     var custPhone = (document.getElementById('cust-phone').value || '').trim() || 'Counter Sale';
@@ -470,16 +473,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var prnTbody = document.getElementById('prn-table-body');
     if (cart.length === 0) {
-      prnTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:12px 0;color:#666">No sweets added to this bill</td></tr>';
+      prnTbody.innerHTML = '<tr><td colspan="3" style="text-align:center">No items</td></tr>';
     } else {
       prnTbody.innerHTML = cart.map(function (row) {
-        var rateStr = inrRound(row.rate) + (row.unit === 'box' ? '/box' : (row.unit === 'piece' ? '/pc' : '/kg'));
-        var wtStr = row.unit === 'kg' ? (row.grams >= 1000 ? (row.grams/1000).toFixed(3) + 'kg' : row.grams + 'g') : row.count + ' ' + (row.unit === 'box' ? (row.count > 1 ? 'boxes' : 'box') : (row.count > 1 ? 'pcs' : 'pc'));
-        var hi = row.nameHi ? ' <span style="font-size:10px;color:#555">(' + esc(row.nameHi) + ')</span>' : '';
+        var wtStr = row.unit === 'kg' ? (row.grams >= 1000 ? (row.grams/1000).toFixed(3) + 'kg' : row.grams + 'g') : row.count + ' ' + row.unit;
         return '<tr>' +
-          '<td><div class="prn-item-name">' + esc(row.name) + hi + '</div><div class="prn-item-rate">@ ' + rateStr + '</div></td>' +
-          '<td style="text-align:center;white-space:nowrap;font-weight:bold">' + wtStr + '</td>' +
-          '<td style="text-align:right;font-weight:bold">' + inr(row.amount) + '</td>' +
+          '<td>' + esc(row.name) + '</td>' +
+          '<td>' + wtStr + '</td>' +
+          '<td style="text-align:right">' + inr(row.amount) + '</td>' +
         '</tr>';
       }).join('');
     }
@@ -487,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('prn-subtotal').textContent = inr(subtotal);
     var boxRow = document.getElementById('prn-box-row');
     if (boxCharge > 0) {
-      boxRow.style.display = 'flex';
+      boxRow.style.display = '';
       document.getElementById('prn-box-charge').textContent = inr(boxCharge);
     } else {
       boxRow.style.display = 'none';
@@ -495,13 +496,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var discRow = document.getElementById('prn-disc-row');
     if (discAmount > 0) {
-      discRow.style.display = 'flex';
+      discRow.style.display = '';
       document.getElementById('prn-disc-amt').textContent = '-' + inr(discAmount);
     } else {
       discRow.style.display = 'none';
     }
 
     document.getElementById('prn-grand-total').textContent = inr(grandTotal);
+  }
+
+  function updatePdfContainer(subtotal, boxCharge, discAmount, grandTotal) {
+    var now = new Date();
+    document.getElementById('pdf-inv-no').textContent = invoiceNum;
+    document.getElementById('pdf-inv-date').textContent = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    document.getElementById('pdf-inv-time').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    var custName = (document.getElementById('cust-name').value || '').trim() || 'Valued Patron';
+    var custPhone = (document.getElementById('cust-phone').value || '').trim() || 'Counter Sale';
+    document.getElementById('pdf-cust-name').textContent = custName;
+    document.getElementById('pdf-cust-phone').textContent = custPhone;
+
+    var pdfTbody = document.getElementById('pdf-table-body');
+    if (cart.length === 0) {
+      pdfTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px">No sweets added to this invoice.</td></tr>';
+    } else {
+      pdfTbody.innerHTML = cart.map(function (row, idx) {
+        var rateStr = inrRound(row.rate) + (row.unit === 'box' ? '/box' : (row.unit === 'piece' ? '/pc' : '/kg'));
+        var wtStr = row.unit === 'kg' ? (row.grams >= 1000 ? (row.grams/1000).toFixed(3) + ' kg' : row.grams + ' g') : row.count + ' ' + (row.unit === 'box' ? (row.count > 1 ? 'boxes' : 'box') : (row.count > 1 ? 'pcs' : 'pc'));
+        var deva = row.nameHi ? ' <span style="font-size:11px;color:#7c6a55">(' + esc(row.nameHi) + ')</span>' : '';
+
+        return '<tr>' +
+          '<td style="text-align:center;font-weight:bold">' + (idx + 1) + '</td>' +
+          '<td><b>' + esc(row.name) + '</b>' + deva + '</td>' +
+          '<td style="text-align:center">' + rateStr + '</td>' +
+          '<td style="text-align:center"><b>' + wtStr + '</b></td>' +
+          '<td style="text-align:right;font-weight:bold;color:var(--burgundy)">' + inr(row.amount) + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    document.getElementById('pdf-subtotal').textContent = inr(subtotal);
+    var boxRow = document.getElementById('pdf-box-row');
+    if (boxCharge > 0) {
+      boxRow.style.display = '';
+      document.getElementById('pdf-box-charge').textContent = inr(boxCharge);
+    } else {
+      boxRow.style.display = 'none';
+    }
+
+    var discRow = document.getElementById('pdf-disc-row');
+    if (discAmount > 0) {
+      discRow.style.display = '';
+      document.getElementById('pdf-disc-amt').textContent = '-' + inr(discAmount);
+    } else {
+      discRow.style.display = 'none';
+    }
+
+    document.getElementById('pdf-grand-total').textContent = inr(grandTotal);
   }
 
   // Event Listeners for Recalculation
@@ -560,16 +611,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var now = new Date();
     var dateStr = now.toLocaleDateString('en-IN');
-    var timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    var timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
     var header = isBackup ? '🛡️ *[SHOP RECORD & BACKUP COPY]*\n' : '';
 
     var msg = header +
               '👑 *OM\'S DEHLII DARBAR MITHAIWALA (Since 1947)*\n' +
               '📍 *Shop No. 20, Delisle Road, Lower Parel, Mumbai — 400 013*\n' +
-              '📞 *Tel:* ' + SHOP_PHONES + '\n' +
-              '🏛️ *GSTIN:* ' + SHOP_GST + '\n' +
-              '📜 *FSSAI Lic:* ' + SHOP_FSSAI + '\n' +
+              '📞 *Hotline:* ' + SHOP_PHONES + '\n' +
+              '🌐 *Our Official Website & Menu:* ' + SHOP_WEBSITE + '\n' +
+              '🏛️ *GSTIN:* ' + SHOP_GST + ' | *FSSAI Lic:* ' + SHOP_FSSAI + '\n' +
               '-----------------------------------------\n' +
               '🧾 *TAX INVOICE / CASH BILL*\n' +
               '🔢 *Bill No:* ' + invoiceNum + '\n' +
@@ -585,14 +636,89 @@ document.addEventListener('DOMContentLoaded', function () {
 
     msg += '⭐ *GRAND TOTAL: ' + inr(grandTotal) + '*\n' +
            '-----------------------------------------\n' +
+           '📄 *Official PDF Tax Invoice attached / generated.*\n' +
+           '🌐 *Explore all sweets on our website:* ' + SHOP_WEBSITE + '\n' +
            '✨ *Freshness Rule:* Milk & Mawa sweets consume within 12 hours. Bengali sweets keep in fridge.\n' +
            '🙏 *Thank you for shopping with us! Have a sweet day!*';
 
     return msg;
   }
 
-  // DIRECT PHONE DISPATCH: WHATSAPP TO CUSTOMER
-  document.getElementById('btn-send-whatsapp').addEventListener('click', function () {
+  // GENERATE PDF BLOB HELPER (A4 PERFECT FIT & NO SCREEN FLICKER)
+  function generatePdfPromise() {
+    var container = document.getElementById('pos-royal-pdf-container');
+    if (!container) return Promise.reject('No PDF container found');
+
+    // Ensure totals and invoice data are freshly calculated
+    if (typeof renderCart === 'function') {
+      renderCart();
+    }
+
+    // Host container in offscreen hidden wrapper so user sees zero screen flicker
+    var host = document.getElementById('pdf-offscreen-host');
+    if (!host) {
+      host = document.createElement('div');
+      host.id = 'pdf-offscreen-host';
+      host.style.cssText = 'position: fixed; left: 0; top: 0; width: 0; height: 0; overflow: hidden; z-index: -99999; pointer-events: none;';
+      document.body.appendChild(host);
+    }
+    host.appendChild(container);
+
+    // Style container inside host for clean full-width clone with balanced padding to prevent right-edge clipping
+    container.style.cssText = 'position: relative !important; left: 0 !important; top: 0 !important; width: 100% !important; opacity: 1 !important; display: block !important; padding: 0 14px 0 6px !important; box-sizing: border-box !important;';
+
+    var box = container.querySelector('.pdf-invoice-box');
+    if (box) {
+      box.style.cssText = 'box-sizing: border-box !important; width: 100% !important; max-width: 700px !important; margin: 0 auto !important; border: 2px solid #C49A45 !important; padding: 14px 16px !important; background: #ffffff !important;';
+    }
+
+    var custName = (document.getElementById('cust-name').value || 'Customer').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+    var filename = 'Invoice_' + invoiceNum + '_' + custName + '.pdf';
+
+    var opt = {
+      margin: [8, 8, 8, 8],
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    if (typeof html2pdf !== 'undefined') {
+      return html2pdf().from(container).set(opt).outputPdf('blob').then(function (blob) {
+        container.style.display = 'none';
+        container.style.cssText = '';
+        if (box) box.style.cssText = '';
+        return { blob: blob, filename: filename };
+      }).catch(function (e) {
+        container.style.display = 'none';
+        container.style.cssText = '';
+        if (box) box.style.cssText = '';
+        throw e;
+      });
+    } else {
+      container.style.display = 'none';
+      container.style.cssText = '';
+      if (box) box.style.cssText = '';
+      return Promise.resolve(null);
+    }
+  }
+
+  // AUTOMATIC SHOP RECORD BACKUP (+91 9820260299)
+  function triggerShopBackupAuto() {
+    var backupMsg = buildWhatsAppBillMessage(true);
+    var backupUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(backupMsg);
+    setTimeout(function () {
+      window.open(backupUrl, '_blank');
+      showNotification('🛡️ Shop record copy sent to +91 9820260299!');
+    }, 1500);
+  }
+
+  // 1-TAP WHATSAPP: Send Bill to Customer + Auto-download PDF + Auto-Backup to Shop
+  document.getElementById('btn-send-whatsapp').addEventListener('click', async function () {
     if (cart.length === 0) {
       alert('Please add at least one sweet item to the bill before dispatching.');
       return;
@@ -601,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var phoneInput = document.getElementById('cust-phone').value.replace(/[^0-9]/g, '');
 
     if (!phoneInput || phoneInput.length < 10) {
-      phoneInput = prompt('Please enter customer’s 10-digit mobile number to send WhatsApp bill:', '');
+      phoneInput = prompt("Enter customer 10-digit mobile number for WhatsApp:", "");
       if (!phoneInput) return;
       phoneInput = phoneInput.replace(/[^0-9]/g, '');
       if (phoneInput.length < 10) {
@@ -613,86 +739,96 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var finalPhone = phoneInput.length === 10 ? '91' + phoneInput : phoneInput;
     var msg = buildWhatsAppBillMessage(false);
-    var waUrl = 'https://wa.me/' + finalPhone + '?text=' + encodeURIComponent(msg);
-    window.open(waUrl, '_blank');
+
+    var btn = this;
+    var origText = btn.innerHTML;
+    btn.innerHTML = '⏳ Preparing Bill...';
+    btn.disabled = true;
+
+    try {
+      // 1. Generate & auto-download official PDF invoice
+      var pdfResult = await generatePdfPromise();
+      if (pdfResult) {
+        var dlLink = document.createElement('a');
+        dlLink.href = URL.createObjectURL(pdfResult.blob);
+        dlLink.download = pdfResult.filename;
+        dlLink.click();
+        showNotification('📥 PDF Invoice downloaded!');
+      }
+
+      // 2. Open Customer WhatsApp chat with full itemized bill & website link
+      var waUrl = 'https://wa.me/' + finalPhone + '?text=' + encodeURIComponent(msg);
+      window.open(waUrl, '_blank');
+
+      // 3. Auto-trigger shop record backup to +91 9820260299
+      triggerShopBackupAuto();
+      showNotification('✅ WhatsApp bill opened & PDF downloaded! Shop backup auto-sent!');
+    } catch (err) {
+      console.warn('PDF error, sending WhatsApp only:', err);
+      var waUrl = 'https://wa.me/' + finalPhone + '?text=' + encodeURIComponent(msg);
+      window.open(waUrl, '_blank');
+      triggerShopBackupAuto();
+    } finally {
+      btn.innerHTML = origText;
+      btn.disabled = false;
+    }
   });
 
-  // SEND SHOP RECORD BACKUP (+91 9820260299)
-  document.getElementById('btn-send-backup').addEventListener('click', function () {
+  // MANUAL SHOP BACKUP BUTTON (+91 9820260299)
+  document.getElementById('btn-send-backup').addEventListener('click', async function () {
     if (cart.length === 0) {
       alert('Please add items to bill first.');
       return;
     }
+
     var msg = buildWhatsAppBillMessage(true);
-    var waUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(msg);
-    window.open(waUrl, '_blank');
+    var btn = this;
+    var origText = btn.innerHTML;
+    btn.innerHTML = '⏳ Sending Backup...';
+    btn.disabled = true;
+
+    try {
+      var waUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(msg);
+      window.open(waUrl, '_blank');
+      showNotification('🛡️ Shop record backup sent to +91 9820260299!');
+    } catch (e) {
+      var waUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(msg);
+      window.open(waUrl, '_blank');
+    } finally {
+      btn.innerHTML = origText;
+      btn.disabled = false;
+    }
   });
 
-  // DOWNLOAD THERMAL PDF BILL (80mm POS RECEIPT)
-  document.getElementById('btn-download-pdf').addEventListener('click', function () {
+  // DOWNLOAD ROYAL PDF BILL ONLY
+  document.getElementById('btn-download-pdf').addEventListener('click', async function () {
     if (cart.length === 0) {
       alert('Please add items to bill before downloading PDF.');
       return;
     }
 
-    var container = document.getElementById('pos-thermal-receipt');
-    if (!container) return;
-
-    // Show loading state
     var btn = this;
     var origText = btn.innerHTML;
-    btn.innerHTML = '⏳ Generating Thermal PDF...';
+    btn.innerHTML = '⏳ Generating PDF...';
     btn.disabled = true;
 
-    // Ensure thermal receipt has fresh calculations
-    renderCart();
-
-    // Temporarily bring container in view for html2canvas rendering
-    container.style.position = 'fixed';
-    container.style.left = '0';
-    container.style.top = '0';
-    container.style.display = 'block';
-    container.style.zIndex = '999999';
-    container.style.background = '#ffffff';
-
-    // Calculate dynamic receipt height in mm
-    // 96 DPI: 1px = 25.4 / 96 mm = ~0.264583 mm
-    var pxToMm = 25.4 / 96;
-    var contentHeightMm = Math.ceil(container.scrollHeight * pxToMm);
-    var totalHeightMm = Math.max(90, contentHeightMm + 10);
-
-    var custName = (document.getElementById('cust-name').value || 'Customer').trim().replace(/\s+/g, '_');
-    var filename = 'Thermal_Receipt_' + invoiceNum + '_' + custName + '.pdf';
-
-    var opt = {
-      margin: [4, 2, 4, 2], // 4mm top/bottom, 2mm left/right
-      filename: filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2.5, useCORS: true, logging: false, backgroundColor: '#ffffff' },
-      jsPDF: { unit: 'mm', format: [80, totalHeightMm], orientation: 'portrait' }
-    };
-
-    function resetThermalContainer() {
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '-9999px';
-      container.style.display = 'none';
-      container.style.zIndex = '';
+    try {
+      var pdfResult = await generatePdfPromise();
+      if (pdfResult) {
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(pdfResult.blob);
+        link.download = pdfResult.filename;
+        link.click();
+        showNotification('📥 PDF Invoice downloaded successfully!');
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error('PDF error:', err);
+      window.print();
+    } finally {
       btn.innerHTML = origText;
       btn.disabled = false;
-    }
-
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(container).save().then(function () {
-        resetThermalContainer();
-      }).catch(function (err) {
-        console.error('PDF error:', err);
-        resetThermalContainer();
-        alert('Thermal PDF generated! If download was blocked, please check browser downloads.');
-      });
-    } else {
-      resetThermalContainer();
-      window.print();
     }
   });
 
@@ -713,7 +849,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var discAmount = (subtotal * discPct) / 100.0;
     var grandTotal = Math.max(0, subtotal + boxCharge - discAmount);
 
-    var smsText = "Om's Dehlii Darbar Bill " + invoiceNum + " for " + custName + ": Total " + inr(grandTotal) + " (" + cart.length + " items). GSTIN: " + SHOP_GST + ", FSSAI: " + SHOP_FSSAI + ". Thank you!";
+    var smsText = "Om's Dehlii Darbar Bill " + invoiceNum + " for " + custName + ": Total " + inr(grandTotal) + " (" + cart.length + " items). Website: " + SHOP_WEBSITE + " | GSTIN: " + SHOP_GST + ", FSSAI: " + SHOP_FSSAI + ". Thank you!";
     var smsUrl = 'sms:' + (phoneInput ? '+91' + phoneInput.slice(-10) : '') + '?body=' + encodeURIComponent(smsText);
     window.location.href = smsUrl;
   });

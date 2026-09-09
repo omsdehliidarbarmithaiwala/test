@@ -144,10 +144,10 @@
           Send Bill to Customer on WhatsApp
         </button>
 
-        <!-- 2. DOWNLOAD THERMAL PDF BILL -->
+        <!-- 2. DOWNLOAD ROYAL PDF BILL -->
         <button class="pos-btn-pdf" id="btn-download-pdf" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-          Download Thermal PDF Bill
+          Download Royal PDF Bill (GST &amp; FSSAI)
         </button>
 
         <!-- 3. SEND BACKUP COPY TO SHOP (9820260299) -->
@@ -255,44 +255,119 @@
 </div>
 
 <!-- ==========================================================================
-     THERMAL RECEIPT SLIP (80mm ESC/POS PRINT & THERMAL PDF CONTAINER)
+     OFFSCREEN ROYAL PDF INVOICE RENDER CONTAINER (HIGH RESOLUTION A4)
      ========================================================================== -->
+<div id="pos-royal-pdf-container" style="display:none">
+  <div class="pdf-invoice-box">
+    <!-- ROYAL HEADER -->
+    <div class="pdf-header-row">
+      <div class="pdf-brand-col">
+        <img class="pdf-logo-img" src="assets/img/logo.svg" alt="Logo">
+        <div style="min-width:0">
+          <h1 class="pdf-shop-name">OM'S DEHLII DARBAR</h1>
+          <div class="pdf-shop-sub">Mithaiwala &mdash; Since 1947 &middot; Mithai n More</div>
+          <div class="pdf-shop-addr">
+            Shop No. 20, Shivaji Nagar, Delisle Road, Lower Parel (E), Mumbai &mdash; 400 013<br>
+            <b>Order Hotline:</b> +91 99208 79952 / +91 98202 60299
+          </div>
+        </div>
+      </div>
+      <div class="pdf-tax-badges">
+        <div class="pdf-tax-pill">GSTIN: <b>27ABZPT1488R1Z4</b></div>
+        <div class="pdf-tax-pill">FSSAI: <b>21521015000240</b></div>
+        <div style="font-size:9px;font-weight:bold;color:#5C061C;margin-top:3px;text-align:right">TAX INVOICE / CASH BILL</div>
+      </div>
+    </div>
+
+    <!-- INVOICE & CUSTOMER META -->
+    <div class="pdf-inv-meta-grid">
+      <div class="pdf-meta-col">
+        <div><b>Invoice No:</b> <span id="pdf-inv-no">ODD-2026-0001</span></div>
+        <div><b>Date:</b> <span id="pdf-inv-date">09 Sep 2026</span> (<span id="pdf-inv-time">13:00 pm</span>)</div>
+        <div><b>Payment:</b> Cash / UPI / Counter POS</div>
+      </div>
+      <div class="pdf-meta-col">
+        <div><b>Billed To:</b> <span id="pdf-cust-name" style="font-weight:bold">Valued Patron</span></div>
+        <div><b>Phone / WhatsApp:</b> <span id="pdf-cust-phone">Counter Sale</span></div>
+        <div><b>Place of Supply:</b> Mumbai, Maharashtra (27)</div>
+      </div>
+    </div>
+
+    <!-- ITEMIZED GOODS TABLE -->
+    <table class="pdf-table">
+      <thead>
+        <tr>
+          <th style="width:5%">#</th>
+          <th style="width:45%">Mithai / Item Description</th>
+          <th style="width:17%;text-align:center">Rate</th>
+          <th style="width:17%;text-align:center">Qty/Wt</th>
+          <th style="width:16%;text-align:right">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="pdf-table-body">
+        <!-- Injected dynamically -->
+      </tbody>
+    </table>
+
+    <!-- TOTALS & SUMMARY -->
+    <div class="pdf-totals-section">
+      <table class="pdf-totals-table">
+        <tr>
+          <td><b>Subtotal:</b></td>
+          <td style="text-align:right" id="pdf-subtotal">&#8377;0.00</td>
+        </tr>
+        <tr id="pdf-box-row" style="display:none">
+          <td><b>Luxury Sweet Box:</b></td>
+          <td style="text-align:right" id="pdf-box-charge">+&#8377;50.00</td>
+        </tr>
+        <tr id="pdf-disc-row" style="display:none">
+          <td><b>Special Discount:</b></td>
+          <td style="text-align:right;color:#c0392b" id="pdf-disc-amt">-&#8377;0.00</td>
+        </tr>
+        <tr class="grand-row">
+          <td><b>GRAND TOTAL:</b></td>
+          <td style="text-align:right" id="pdf-grand-total">&#8377;0.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- FRESHNESS & LOYALTY FOOTER -->
+    <div class="pdf-loyalty-box">
+      <div style="font-size:9px;font-weight:bold;color:#5C061C;margin-bottom:4px">&#11088; FRESHNESS RULES</div>
+      <div>Milk &amp; Mawa sweets should be consumed same day within 12 hours. Bengali sweets should be kept in fridge (within 6 hrs).</div>
+      <div style="margin-top:4px;font-style:italic">Pure Ghee Mithais &middot; Zero Adulteration &middot; Made in our kitchen on Delisle Road since 1947.</div>
+      <div style="margin-top:5px;font-weight:bold;color:#5C061C">&#128142; Thank you for choosing Om's Dehlii Darbar Mithaiwala! Have a sweet and auspicious day!</div>
+      <div style="margin-top:5px;font-size:8.5px;color:#7A6B58">&#127760; Visit our website: <b>https://omsdehliidarbarmithaiwala.github.io/Our-Website/</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- THERMAL RECEIPT SLIP (80mm ESC/POS READY) -->
 <div id="pos-thermal-receipt">
   <div class="prn-header">
-    <img class="prn-logo" src="assets/img/logo.svg" alt="Om's Dehlii Darbar">
     <h2>OM'S DEHLII DARBAR</h2>
-    <p class="prn-shop-sub">MITHAIWALA — SINCE 1947</p>
+    <p><b>MITHAIWALA — SINCE 1947</b></p>
     <p>Shop No. 20, Shivaji Nagar, Delisle Road<br>Lower Parel (E), Mumbai — 400 013</p>
     <p>Tel: 99208 79952 / 98202 60299</p>
-    <p class="prn-tax-line">GSTIN: 27ABZPT1488R1Z4 · FSSAI: 21521015000240</p>
-    <div class="prn-doc-title">*** TAX INVOICE / CASH BILL ***</div>
+    <p>GSTIN: 27ABZPT1488R1Z4 · FSSAI: 21521015000240</p>
   </div>
 
   <table class="prn-meta-table">
-    <tr>
-      <td><b>Bill No:</b> <span id="prn-inv-no">ODD-2026-0001</span></td>
-      <td style="text-align:right"><b>Date:</b> <span id="prn-inv-date">09/09/2026</span></td>
-    </tr>
-    <tr>
-      <td><b>Customer:</b> <span id="prn-cust-name">Valued Patron</span></td>
-      <td style="text-align:right"><b>Time:</b> <span id="prn-inv-time">13:00</span></td>
-    </tr>
-    <tr>
-      <td><b>Phone:</b> <span id="prn-cust-phone">Counter Sale</span></td>
-      <td style="text-align:right"><b>Mode:</b> POS / Cash / UPI</td>
-    </tr>
+    <tr><td><b>Bill No:</b> <span id="prn-inv-no">ODD-2026-0001</span></td><td style="text-align:right"><b>Date:</b> <span id="prn-inv-date">09/09/2026</span></td></tr>
+    <tr><td><b>Customer:</b> <span id="prn-cust-name">Valued Patron</span></td><td style="text-align:right"><b>Time:</b> <span id="prn-inv-time">13:00</span></td></tr>
+    <tr><td colspan="2"><b>Phone:</b> <span id="prn-cust-phone">Counter Sale</span></td></tr>
   </table>
 
   <table class="prn-items-table">
     <thead>
       <tr>
-        <th style="width:52%;text-align:left">Item / Rate</th>
-        <th style="width:24%;text-align:center">Qty/Wt</th>
-        <th style="width:24%;text-align:right">Amt (₹)</th>
+        <th>Item</th>
+        <th>Qty/Wt</th>
+        <th style="text-align:right">Amt (₹)</th>
       </tr>
     </thead>
     <tbody id="prn-table-body">
-      <!-- Item rows injected dynamically -->
+      <!-- Rows -->
     </tbody>
   </table>
 
@@ -302,26 +377,28 @@
       <span id="prn-subtotal">₹0.00</span>
     </div>
     <div class="prn-sum-row" id="prn-box-row" style="display:none">
-      <span>Luxury Sweet Box:</span>
+      <span>Luxury Gift Box:</span>
       <span id="prn-box-charge">+₹50.00</span>
     </div>
     <div class="prn-sum-row" id="prn-disc-row" style="display:none">
-      <span>Special Discount:</span>
+      <span>Discount:</span>
       <span id="prn-disc-amt">-₹0.00</span>
     </div>
-    <div class="prn-sum-row prn-grand-row">
+    <div class="prn-sum-row prn-grand-row" style="margin-top:2mm">
       <span>GRAND TOTAL:</span>
       <span id="prn-grand-total">₹0.00</span>
     </div>
   </div>
 
   <div class="prn-footer">
-    <p><b>✨ FRESHNESS RULES:</b></p>
-    <p>Milk &amp; Mawa sweets consume within 12 hours.<br>Bengali sweets keep refrigerated (within 6 hrs).</p>
-    <p style="margin-top:4px">Pure Ghee Mithais · Zero Adulteration · Since 1947</p>
-    <p style="margin-top:6px;font-weight:bold">*** Thank You! Visit Again ***</p>
+    <p><b>FRESHNESS NOTICE:</b></p>
+    <p>Milk &amp; Mawa sweets consume within 12 hours.</p>
+    <p>Bengali sweets keep in fridge (within 6 hrs).</p>
+    <p>*** Thank You! Visit Again ***</p>
   </div>
 </div>
 
+  <!-- TOAST NOTIFICATION -->
+  <div id="pos-toast"></div>
 </body>
 </html>
