@@ -1,0 +1,4 @@
+_to_delete/
+*.zip
+.DS_Store
+Thumbs.db
