@@ -1299,13 +1299,9 @@ img {
 }
 
 .pos-secondary-actions {
-
   display: grid;
-
-  grid-template-columns: 1fr 1fr 1fr;
-
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-
 }
 
 .pos-btn-sms {
@@ -2114,4 +2110,176 @@ img {
 #pos-toast.show {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
+}
+
+/* ==========================================================================
+   THERMAL RECEIPT SLIP (80mm ESC/POS PRINT & PREVIEW)
+   ========================================================================== */
+#pos-thermal-receipt {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #pos-thermal-receipt, #pos-thermal-receipt * {
+    visibility: visible !important;
+  }
+  #pos-thermal-receipt {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 4mm 3mm !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Courier New', Courier, monospace, system-ui !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  #pos-thermal-receipt .prn-header {
+    text-align: center;
+    border-bottom: 1px dashed #000;
+    padding-bottom: 2.5mm;
+    margin-bottom: 2mm;
+  }
+
+  #pos-thermal-receipt .prn-header h2 {
+    font-size: 15px;
+    font-weight: 900;
+    margin: 0 0 2px 0;
+    letter-spacing: 0.5px;
+    color: #000;
+  }
+
+  #pos-thermal-receipt .prn-header p {
+    margin: 1.5px 0;
+    font-size: 10px;
+    color: #000;
+  }
+
+  #pos-thermal-receipt .prn-meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2mm;
+    font-size: 10.5px;
+  }
+
+  #pos-thermal-receipt .prn-meta-table td {
+    padding: 1.5px 0;
+    vertical-align: top;
+  }
+
+  #pos-thermal-receipt .prn-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2mm;
+  }
+
+  #pos-thermal-receipt .prn-items-table th {
+    border-top: 1px dashed #000;
+    border-bottom: 1px dashed #000;
+    padding: 2.5px 0;
+    font-size: 10.5px;
+    text-transform: uppercase;
+  }
+
+  #pos-thermal-receipt .prn-items-table td {
+    padding: 2px 0;
+    font-size: 11px;
+    vertical-align: top;
+    border-bottom: 1px dotted #888;
+  }
+
+  #pos-thermal-receipt .prn-summary {
+    border-top: 1px dashed #000;
+    border-bottom: 1px dashed #000;
+    padding: 2mm 0;
+    margin-bottom: 2mm;
+  }
+
+  #pos-thermal-receipt .prn-sum-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 1.5px 0;
+    font-size: 11px;
+  }
+
+  #pos-thermal-receipt .prn-grand-row {
+    font-size: 13.5px;
+    font-weight: 900;
+    border-top: 1px dashed #000;
+    padding-top: 2mm;
+    margin-top: 1.5mm;
+  }
+
+  #pos-thermal-receipt .prn-footer {
+    text-align: center;
+    font-size: 9.5px;
+    line-height: 1.35;
+    margin-top: 2mm;
+  }
+
+  #pos-thermal-receipt .prn-footer p {
+    margin: 1.5px 0;
+  }
+}
+
+/* --- RESPONSIVE MEDIA QUERIES (TABLETS & PHONES) --- */
+@media (max-width: 1024px) {
+  .pos-layout-grid {
+    grid-template-columns: 1fr 380px;
+    gap: 14px;
+  }
+  .pos-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .pos-mobile-tabs {
+    display: flex;
+  }
+  .pos-mobile-bottom-bar {
+    display: block;
+  }
+  .pos-main-container {
+    padding: 10px 10px 84px 10px;
+  }
+  .pos-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .pos-catalogue-card.mobile-hidden {
+    display: none !important;
+  }
+  .pos-bill-card.mobile-hidden {
+    display: none !important;
+  }
+  
+  .pos-bill-card {
+    position: static;
+  }
+  .pos-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 10px;
+    max-height: none;
+  }
+  .pos-item-title {
+    font-size: 13.5px;
+  }
+  .pos-chips-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .pos-cust-section {
+    grid-template-columns: 1fr;
+  }
 }

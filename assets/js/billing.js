@@ -136,19 +136,21 @@ document.addEventListener('DOMContentLoaded', function () {
   var modalGramMinus = document.getElementById('modal-gram-minus');
   var modalGramPlus = document.getElementById('modal-gram-plus');
 
-  // Mobile View Switcher
   function switchMobileView(view) {
+    var mobileBottomBar = document.getElementById('pos-mobile-bottom-bar');
     if (view === 'cart') {
       tabCatalogueBtn.classList.remove('active');
       tabCartBtn.classList.add('active');
       catalogueCard.classList.add('mobile-hidden');
       billCard.classList.remove('mobile-hidden');
+      if (mobileBottomBar) mobileBottomBar.style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       tabCatalogueBtn.classList.add('active');
       tabCartBtn.classList.remove('active');
       catalogueCard.classList.remove('mobile-hidden');
       billCard.classList.add('mobile-hidden');
+      if (mobileBottomBar) mobileBottomBar.style.display = '';
     }
   }
 
@@ -506,6 +508,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updatePdfContainer(subtotal, boxCharge, discAmount, grandTotal) {
+    if (!document.getElementById('pos-royal-pdf-container')) return;
     var now = new Date();
     document.getElementById('pdf-inv-no').textContent = invoiceNum;
     document.getElementById('pdf-inv-date').textContent = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -717,8 +720,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 1500);
   }
 
-  // 1-TAP WHATSAPP: Send Bill to Customer + Auto-download PDF + Auto-Backup to Shop
-  document.getElementById('btn-send-whatsapp').addEventListener('click', async function () {
+  // 1-TAP WHATSAPP: Send Bill to Customer + Auto-Backup to Shop
+  document.getElementById('btn-send-whatsapp').addEventListener('click', function () {
     if (cart.length === 0) {
       alert('Please add at least one sweet item to the bill before dispatching.');
       return;
@@ -739,98 +742,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var finalPhone = phoneInput.length === 10 ? '91' + phoneInput : phoneInput;
     var msg = buildWhatsAppBillMessage(false);
+    var waUrl = 'https://wa.me/' + finalPhone + '?text=' + encodeURIComponent(msg);
+    window.open(waUrl, '_blank');
 
-    var btn = this;
-    var origText = btn.innerHTML;
-    btn.innerHTML = '⏳ Preparing Bill...';
-    btn.disabled = true;
-
-    try {
-      // 1. Generate & auto-download official PDF invoice
-      var pdfResult = await generatePdfPromise();
-      if (pdfResult) {
-        var dlLink = document.createElement('a');
-        dlLink.href = URL.createObjectURL(pdfResult.blob);
-        dlLink.download = pdfResult.filename;
-        dlLink.click();
-        showNotification('📥 PDF Invoice downloaded!');
-      }
-
-      // 2. Open Customer WhatsApp chat with full itemized bill & website link
-      var waUrl = 'https://wa.me/' + finalPhone + '?text=' + encodeURIComponent(msg);
-      window.open(waUrl, '_blank');
-
-      // 3. Auto-trigger shop record backup to +91 9820260299
-      triggerShopBackupAuto();
-      showNotification('✅ WhatsApp bill opened & PDF downloaded! Shop backup auto-sent!');
-    } catch (err) {
-      console.warn('PDF error, sending WhatsApp only:', err);
-      var waUrl = 'https://wa.me/' + finalPhone + '?text=' + encodeURIComponent(msg);
-      window.open(waUrl, '_blank');
-      triggerShopBackupAuto();
-    } finally {
-      btn.innerHTML = origText;
-      btn.disabled = false;
-    }
+    triggerShopBackupAuto();
+    showNotification('✅ WhatsApp bill opened! Shop record copy auto-sent.');
   });
 
   // MANUAL SHOP BACKUP BUTTON (+91 9820260299)
-  document.getElementById('btn-send-backup').addEventListener('click', async function () {
+  document.getElementById('btn-send-backup').addEventListener('click', function () {
     if (cart.length === 0) {
       alert('Please add items to bill first.');
       return;
     }
 
     var msg = buildWhatsAppBillMessage(true);
-    var btn = this;
-    var origText = btn.innerHTML;
-    btn.innerHTML = '⏳ Sending Backup...';
-    btn.disabled = true;
-
-    try {
-      var waUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(msg);
-      window.open(waUrl, '_blank');
-      showNotification('🛡️ Shop record backup sent to +91 9820260299!');
-    } catch (e) {
-      var waUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(msg);
-      window.open(waUrl, '_blank');
-    } finally {
-      btn.innerHTML = origText;
-      btn.disabled = false;
-    }
+    var waUrl = 'https://wa.me/' + SHOP_BACKUP_PHONE + '?text=' + encodeURIComponent(msg);
+    window.open(waUrl, '_blank');
+    showNotification('🛡️ Shop record backup sent to +91 9820260299!');
   });
 
-  // DOWNLOAD ROYAL PDF BILL ONLY
-  document.getElementById('btn-download-pdf').addEventListener('click', async function () {
-    if (cart.length === 0) {
-      alert('Please add items to bill before downloading PDF.');
-      return;
-    }
-
-    var btn = this;
-    var origText = btn.innerHTML;
-    btn.innerHTML = '⏳ Generating PDF...';
-    btn.disabled = true;
-
-    try {
-      var pdfResult = await generatePdfPromise();
-      if (pdfResult) {
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(pdfResult.blob);
-        link.download = pdfResult.filename;
-        link.click();
-        showNotification('📥 PDF Invoice downloaded successfully!');
-      } else {
-        window.print();
+  // 2. PRINT THERMAL BILL (80mm ESC/POS RECEIPT SLIP)
+  var btnThermal = document.getElementById('btn-thermal-print');
+  if (btnThermal) {
+    btnThermal.addEventListener('click', function () {
+      if (cart.length === 0) {
+        alert('Please add at least one sweet item to the bill before printing.');
+        return;
       }
-    } catch (err) {
-      console.error('PDF error:', err);
+      renderCart();
       window.print();
-    } finally {
-      btn.innerHTML = origText;
-      btn.disabled = false;
-    }
-  });
+    });
+  }
 
   // DIRECT PHONE DISPATCH: SMS
   document.getElementById('btn-send-sms').addEventListener('click', function () {
