@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Counter POS Billing Terminal — Om's Dehlii Darbar Mithaiwala (Since 1947)</title>
+<meta name="description" content="Official Counter POS Billing System for Om's Dehlii Darbar Mithaiwala. Gram-accurate sweet weighing & pricing, customer digital invoice generation, GST & FSSAI certified PDF bills, and 1-tap WhatsApp & SMS dispatch.">
+<meta name="theme-color" content="#460917">
+<link rel="stylesheet" href="assets/css/billing.css?v=2026-09-09b">
+<script src="assets/js/products.js?v=2026-09-09b" defer></script>
+<script src="assets/js/html2pdf.bundle.min.js" defer></script>
+<script src="assets/js/billing.js?v=2026-09-09b" defer></script>
+<link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+</head>
+<body>
+
+<!-- APP TOP HEADER -->
+<header class="pos-app-header">
+  <div class="pos-header-inner">
+    <div class="pos-brand">
+      <img class="pos-brand-logo" src="assets/img/logo.svg" alt="Om's Dehlii Darbar">
+      <div>
+        <h1 class="pos-brand-title">Om's Dehlii Darbar</h1>
+        <div class="pos-brand-sub">Counter POS Terminal · Since 1947</div>
+      </div>
+    </div>
+    <div class="pos-header-status">
+      <div class="pos-live-pill"><span class="pos-live-dot"></span> Live Terminal</div>
+      <div class="pos-clock" id="pos-live-clock">--:--:--</div>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE NAVIGATION TABS (PHONES ONLY) -->
+<nav class="pos-mobile-tabs" aria-label="Mobile View Switcher">
+  <button class="pos-m-tab-btn active" id="pos-tab-catalogue" type="button">
+    🍬 Mithai Menu
+  </button>
+  <button class="pos-m-tab-btn" id="pos-tab-cart" type="button">
+    🧾 Customer Bill <span class="pos-m-badge" id="pos-m-cart-badge">0</span>
+  </button>
+</nav>
+
+<!-- MAIN APP CONTAINER -->
+<main class="pos-main-container">
+  <div class="pos-layout-grid">
+    
+    <!-- LEFT PANEL: COUNTER CATALOGUE -->
+    <section class="pos-catalogue-card" id="pos-catalogue-panel">
+      <!-- SEARCH & CUSTOM ITEM BAR -->
+      <div class="pos-search-bar">
+        <div class="pos-search-input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="pos-search-input" class="pos-search-input" placeholder="Search sweets in English or Devanagari..." autocomplete="off">
+        </div>
+        <button class="pos-btn-custom" id="pos-btn-custom-item" type="button">+ Custom Item</button>
+      </div>
+
+      <!-- HORIZONTAL CATEGORY SCROLL -->
+      <div class="pos-category-scroll" role="tablist">
+        <button class="pos-cat-pill active" data-cat="all">Everything (सब)</button>
+        <button class="pos-cat-pill" data-cat="modak">🕉️ Modak &amp; Prasad</button>
+        <button class="pos-cat-pill" data-cat="dryfruit">🌰 Dry Fruit Sweets</button>
+        <button class="pos-cat-pill" data-cat="milk-mawa">🥛 Milk &amp; Mawa</button>
+        <button class="pos-cat-pill" data-cat="peda">🪔 Traditional Pedas</button>
+        <button class="pos-cat-pill" data-cat="bengali">🍯 Bengali Sweets</button>
+        <button class="pos-cat-pill" data-cat="farsan">🌶️ Fresh Farsan</button>
+        <button class="pos-cat-pill" data-cat="bands">🎁 4 Assortment Bands</button>
+        <button class="pos-cat-pill" data-cat="boxes">📦 Gift Hampers</button>
+      </div>
+
+      <!-- TOUCH ITEMS GRID -->
+      <div class="pos-items-grid" id="pos-items-container">
+        <!-- Dynamic Item Cards -->
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: CUSTOMER BILL & DISPATCH -->
+    <section class="pos-bill-card" id="pos-bill-panel">
+      <div class="pos-bill-top">
+        <div>
+          <h2 class="pos-bill-title">Customer Bill</h2>
+          <div style="font-size:11px;color:var(--muted)">GSTIN: 27ABZPT1488R1Z4 · FSSAI: 21521015000240</div>
+        </div>
+        <span class="pos-inv-chip" id="pos-invoice-num">INV #ODD-2026-0001</span>
+      </div>
+
+      <!-- CUSTOMER DETAILS -->
+      <div class="pos-cust-section">
+        <div class="pos-field-group">
+          <label for="cust-name">Customer Name</label>
+          <input type="text" id="cust-name" class="pos-field-input" placeholder="e.g. Rajesh Sharma" autocomplete="off">
+        </div>
+        <div class="pos-field-group">
+          <label for="cust-phone">Receiver Mobile No. *</label>
+          <input type="tel" id="cust-phone" class="pos-field-input" placeholder="10 digits (e.g. 9820260299)" maxlength="10" inputmode="numeric">
+        </div>
+      </div>
+
+      <!-- CART ITEMS LIST -->
+      <div class="pos-cart-scroll-area">
+        <div class="pos-cart-empty-view" id="pos-cart-empty-view">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <p style="font-weight:700">No sweets added yet.</p>
+          <p style="font-size:12px">Tap any sweet from the catalogue to weigh and calculate grams.</p>
+        </div>
+        <div id="pos-cart-list"></div>
+      </div>
+
+      <!-- BILL SUMMARY & DISCOUNTS -->
+      <div class="pos-bill-summary-area">
+        <div class="pos-toggle-row">
+          <label for="pos-toggle-fancy-box" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="pos-toggle-fancy-box" style="width:17px;height:17px">
+            <b>Add Luxury Sweet Box (+₹50)</b>
+          </label>
+          <span style="font-weight:700;color:var(--gold)" id="pos-sum-box-charge">₹0.00</span>
+        </div>
+
+        <div class="pos-summary-line">
+          <span>Subtotal (<span id="pos-sum-items-count">0 items</span>)</span>
+          <span id="pos-sum-subtotal" style="font-weight:700">₹0.00</span>
+        </div>
+
+        <div class="pos-summary-line">
+          <span style="display:flex;align-items:center;gap:6px">
+            Special Discount (%):
+            <input type="number" id="pos-discount-pct" value="0" min="0" max="50" style="width:54px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;text-align:center" inputmode="numeric">
+          </span>
+          <span id="pos-sum-discount" style="color:var(--danger);font-weight:700">-₹0.00</span>
+        </div>
+
+        <div class="pos-summary-line grand">
+          <span>GRAND TOTAL:</span>
+          <span class="pos-grand-amt" id="pos-sum-grand-total">₹0.00</span>
+        </div>
+      </div>
+
+      <!-- DIRECT DISPATCH & ACTION BUTTONS -->
+      <div class="pos-bill-actions">
+        <!-- 1. WHATSAPP CUSTOMER DISPATCH -->
+        <button class="pos-btn-wa" id="btn-send-whatsapp" type="button">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 18.15a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.17 8.17 0 0 1 2.41 5.82c0 4.54-3.69 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.11-.5.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.47c-.16 0-.43.06-.65.31-.22.25-.85.83-.85 2.03s.87 2.35.99 2.51c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.39.51.58.19 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.28Z"/></svg>
+          Send Bill to Customer on WhatsApp
+        </button>
+
+        <!-- 2. DOWNLOAD ROYAL PDF BILL -->
+        <button class="pos-btn-pdf" id="btn-download-pdf" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Download Royal PDF Bill (GST &amp; FSSAI)
+        </button>
+
+        <!-- 3. SEND BACKUP COPY TO SHOP (9820260299) -->
+        <button class="pos-btn-backup" id="btn-send-backup" type="button">
+          🛡️ Send Record Copy to Shop Backup (+91 9820260299)
+        </button>
+
+        <div class="pos-secondary-actions">
+          <button class="pos-btn-sms" id="btn-send-sms" type="button">
+            💬 SMS
+          </button>
+          <button class="pos-btn-print" type="button" onclick="window.print()">
+            🖨️ Thermal
+          </button>
+          <button class="pos-btn-clear" id="btn-clear-cart" type="button">
+            🗑️ New Bill
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MOBILE FLOATING BOTTOM BAR (PHONES ONLY) -->
+<div class="pos-mobile-bottom-bar" id="pos-mobile-bottom-bar">
+  <div class="pos-m-bar-inner">
+    <div class="pos-m-bar-info">
+      <span class="pos-m-bar-count" id="pos-m-bar-count-text">0 items</span>
+      <span class="pos-m-bar-total" id="pos-m-bar-grand-total">₹0.00</span>
+    </div>
+    <button class="pos-m-bar-btn" id="pos-m-bar-view-btn" type="button">
+      View Bill &amp; Dispatch &rsaquo;
+    </button>
+  </div>
+</div>
+
+<!-- TOUCH WEIGHING & GRAM CALCULATION MODAL -->
+<div class="pos-modal-overlay" id="weigh-modal-overlay">
+  <div class="pos-modal-box">
+    <div class="pos-modal-header">
+      <h3 id="modal-sweet-name">Weigh &amp; Calculate Grams</h3>
+      <button class="pos-modal-close" id="modal-close-btn" type="button" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="pos-modal-body">
+      <!-- ITEM INFO BANNER -->
+      <div class="pos-modal-item-summary">
+        <img id="modal-item-img" class="pos-modal-item-img" src="assets/img/kaju-katri-400.jpg" alt="Sweet item">
+        <div>
+          <div class="pos-modal-item-name" id="modal-item-title">Kaju Katri</div>
+          <div style="font-size:12px;color:#8c7355" id="modal-item-deva">काजू कतरी</div>
+          <div class="pos-modal-item-rate-badge" id="modal-item-rate-label">Official Rate: ₹1,200 per kg</div>
+        </div>
+      </div>
+
+      <!-- WEIGHING CONTROLS (KG ITEMS) -->
+      <div id="modal-weight-controls">
+        <div class="pos-chips-label">Quick Weigh Presets (Tap to select):</div>
+        <div class="pos-chips-grid">
+          <button class="pos-chip-btn" type="button" data-grams="50">50g</button>
+          <button class="pos-chip-btn" type="button" data-grams="100">100g</button>
+          <button class="pos-chip-btn active" type="button" data-grams="250">250g</button>
+          <button class="pos-chip-btn" type="button" data-grams="350">350g</button>
+          <button class="pos-chip-btn" type="button" data-grams="500">500g</button>
+          <button class="pos-chip-btn" type="button" data-grams="750">750g</button>
+          <button class="pos-chip-btn" type="button" data-grams="1000">1000g (1kg)</button>
+          <button class="pos-chip-btn" type="button" data-grams="1500">1.5 kg</button>
+        </div>
+
+        <div style="margin-top:14px">
+          <div class="pos-chips-label">Exact Grams on Counter Scale:</div>
+          <div class="pos-input-stepper-wrap">
+            <button class="pos-stepper-btn" id="modal-gram-minus" type="button">-50g</button>
+            <input type="number" id="modal-input-grams" class="pos-gram-input" value="250" min="1" step="1" inputmode="numeric">
+            <span class="pos-gram-unit-tag">GRAMS</span>
+            <button class="pos-stepper-btn" id="modal-gram-plus" type="button">+50g</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COUNT CONTROLS (PIECE & BOX ITEMS) -->
+      <div id="modal-count-controls" style="display:none">
+        <div class="pos-chips-label">Quantity:</div>
+        <div class="pos-input-stepper-wrap">
+          <button class="pos-stepper-btn" id="modal-count-minus" type="button">-</button>
+          <input type="number" id="modal-input-count" class="pos-gram-input" value="1" min="1" step="1" inputmode="numeric">
+          <button class="pos-stepper-btn" id="modal-count-plus" type="button">+</button>
+        </div>
+      </div>
+
+      <!-- REAL-TIME PRICE CALCULATION PREVIEW -->
+      <div class="pos-calc-preview-card">
+        <div class="pos-calc-formula-text" id="modal-calc-formula">(₹1,200 ÷ 1000g) × 250g</div>
+        <div class="pos-calc-price-big" id="modal-calc-price">₹300.00</div>
+        <div class="pos-calc-detail-sub" id="modal-calc-sub">Calculated for exact 250 grams (0.250 kg)</div>
+      </div>
+
+      <!-- CONFIRM BUTTON -->
+      <button class="pos-btn-modal-add" id="modal-btn-confirm-add" type="button">
+        Add to Bill (बिल में जोड़ें)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     OFFSCREEN ROYAL PDF INVOICE RENDER CONTAINER (HIGH RESOLUTION A4)
+     ========================================================================== -->
+<div id="pos-royal-pdf-container">
+  <div class="pdf-invoice-box">
+    <!-- ROYAL HEADER -->
+    <div class="pdf-header-row">
+      <div class="pdf-brand-col">
+        <img class="pdf-logo-img" src="assets/img/logo.svg" alt="Logo">
+        <div>
+          <h1 class="pdf-shop-name">OM'S DEHLII DARBAR</h1>
+          <div class="pdf-shop-sub">Mithaiwala — Since 1947 · Mithai n More</div>
+          <div class="pdf-shop-addr">
+            Shop No. 20, Shivaji Nagar, Delisle Road, Lower Parel (E), Mumbai — 400 013<br>
+            <b>Order Hotline:</b> +91 99208 79952 / +91 98202 60299
+          </div>
+        </div>
+      </div>
+      <div class="pdf-tax-badges">
+        <div class="pdf-tax-pill">GSTIN: <b>27ABZPT1488R1Z4</b></div>
+        <div class="pdf-tax-pill">FSSAI Lic: <b>21521015000240</b></div>
+        <div style="font-size:12px;font-weight:bold;color:var(--burgundy);margin-top:4px">TAX INVOICE / CASH BILL</div>
+      </div>
+    </div>
+
+    <!-- INVOICE & CUSTOMER META -->
+    <div class="pdf-inv-meta-grid">
+      <div class="pdf-meta-col">
+        <div><b>Invoice No:</b> <span id="pdf-inv-no">ODD-2026-0001</span></div>
+        <div><b>Invoice Date:</b> <span id="pdf-inv-date">09 Sep 2026</span> (<span id="pdf-inv-time">13:00</span>)</div>
+        <div><b>Payment Mode:</b> Cash / UPI / Counter POS</div>
+      </div>
+      <div class="pdf-meta-col">
+        <div><b>Billed To:</b> <span id="pdf-cust-name" style="font-weight:bold">Valued Patron</span></div>
+        <div><b>Phone / WhatsApp:</b> <span id="pdf-cust-phone">Counter Sale</span></div>
+        <div><b>Place of Supply:</b> Mumbai, Maharashtra (27)</div>
+      </div>
+    </div>
+
+    <!-- ITEMIZED GOODS TABLE -->
+    <table class="pdf-table">
+      <thead>
+        <tr>
+          <th style="width:6%">#</th>
+          <th style="width:46%">Mithai / Item Description</th>
+          <th style="width:16%;text-align:center">Rate (₹)</th>
+          <th style="width:16%;text-align:center">Qty / Weight</th>
+          <th style="width:16%;text-align:right">Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="pdf-table-body">
+        <!-- Injected dynamically -->
+      </tbody>
+    </table>
+
+    <!-- TOTALS & SUMMARY -->
+    <div class="pdf-totals-section">
+      <table class="pdf-totals-table">
+        <tr>
+          <td><b>Subtotal:</b></td>
+          <td style="text-align:right" id="pdf-subtotal">₹0.00</td>
+        </tr>
+        <tr id="pdf-box-row" style="display:none">
+          <td><b>Luxury Sweet Box:</b></td>
+          <td style="text-align:right" id="pdf-box-charge">+₹50.00</td>
+        </tr>
+        <tr id="pdf-disc-row" style="display:none">
+          <td><b>Special Discount:</b></td>
+          <td style="text-align:right;color:var(--danger)" id="pdf-disc-amt">-₹0.00</td>
+        </tr>
+        <tr class="grand-row">
+          <td><b>GRAND TOTAL:</b></td>
+          <td style="text-align:right" id="pdf-grand-total">₹0.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ROYAL FOOTER & FRESHNESS NOTICE -->
+    <div class="pdf-footer-notice">
+      <p><b>✨ FRESHNESS RULES:</b> Milk &amp; Mawa sweets should be consumed same day within 12 hours. Bengali sweets should be kept in fridge and consumed within 6 hours.</p>
+      <p style="margin-top:4px">Pure Ghee Mithais · Zero Adulteration · Made in our kitchen on Delisle Road since 1947.</p>
+      <p style="margin-top:6px;font-weight:bold;color:var(--burgundy)">🙏 Thank you for choosing Om's Dehlii Darbar Mithaiwala! Have a sweet and auspicious day!</p>
+    </div>
+  </div>
+</div>
+
+<!-- THERMAL RECEIPT SLIP (80mm ESC/POS READY) -->
+<div id="pos-thermal-receipt">
+  <div class="prn-header">
+    <h2>OM'S DEHLII DARBAR</h2>
+    <p><b>MITHAIWALA — SINCE 1947</b></p>
+    <p>Shop No. 20, Shivaji Nagar, Delisle Road<br>Lower Parel (E), Mumbai — 400 013</p>
+    <p>Tel: 99208 79952 / 98202 60299</p>
+    <p>GSTIN: 27ABZPT1488R1Z4 · FSSAI: 21521015000240</p>
+  </div>
+
+  <table class="prn-meta-table">
+    <tr><td><b>Bill No:</b> <span id="prn-inv-no">ODD-2026-0001</span></td><td style="text-align:right"><b>Date:</b> <span id="prn-inv-date">09/09/2026</span></td></tr>
+    <tr><td><b>Customer:</b> <span id="prn-cust-name">Valued Patron</span></td><td style="text-align:right"><b>Time:</b> <span id="prn-inv-time">13:00</span></td></tr>
+    <tr><td colspan="2"><b>Phone:</b> <span id="prn-cust-phone">Counter Sale</span></td></tr>
+  </table>
+
+  <table class="prn-items-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty/Wt</th>
+        <th style="text-align:right">Amt (₹)</th>
+      </tr>
+    </thead>
+    <tbody id="prn-table-body">
+      <!-- Rows -->
+    </tbody>
+  </table>
+
+  <div class="prn-summary">
+    <div class="prn-sum-row">
+      <span>Subtotal:</span>
+      <span id="prn-subtotal">₹0.00</span>
+    </div>
+    <div class="prn-sum-row" id="prn-box-row" style="display:none">
+      <span>Luxury Gift Box:</span>
+      <span id="prn-box-charge">+₹50.00</span>
+    </div>
+    <div class="prn-sum-row" id="prn-disc-row" style="display:none">
+      <span>Discount:</span>
+      <span id="prn-disc-amt">-₹0.00</span>
+    </div>
+    <div class="prn-sum-row prn-grand-row" style="margin-top:2mm">
+      <span>GRAND TOTAL:</span>
+      <span id="prn-grand-total">₹0.00</span>
+    </div>
+  </div>
+
+  <div class="prn-footer">
+    <p><b>FRESHNESS NOTICE:</b></p>
+    <p>Milk &amp; Mawa sweets consume within 12 hours.</p>
+    <p>Bengali sweets keep in fridge (within 6 hrs).</p>
+    <p>*** Thank You! Visit Again ***</p>
+  </div>
+</div>
+
+</body>
+</html>
